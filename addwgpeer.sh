@@ -12,12 +12,11 @@ wg set $1 peer $PUBKEY allowed-ips $2
 echo "
 [Interface]
 Address = $2
-DNS = 1.1.1.1
+DNS = $3
 PrivateKey = $PRIVKEY
 
 [Peer]
 PublicKey = $SERVERPUBKEY
 AllowedIPs = 0.0.0.0/0
-Endpoint = $3
-" | qrencode -t utf8
-
+Endpoint = $4
+" | tee /dev/tty | qrencode -t utf8
