@@ -7,7 +7,7 @@ SERVERPUBKEY=$(wg show $1 public-key)
 #echo $PRIVKEY
 #echo $PUBKEY
 
-wg set $1 peer $PUBKEY
+wg set $1 peer $PUBKEY allowed-ips $2
 
 echo "
 [Interface]
