@@ -20,3 +20,5 @@ PublicKey = $SERVERPUBKEY
 AllowedIPs = 0.0.0.0/0
 Endpoint = $4
 " | tee /dev/tty | qrencode -t utf8
+
+wg-quick save $1
