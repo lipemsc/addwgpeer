@@ -11,5 +11,5 @@ sudo chmod +x /usr/local/bin/addwgpeer
 ## Usage
 
 ```sh
-sudo sh addwgpeer.sh [wireguard-interface] [client-ip] [dns-server] [endpoint]
+sudo addwgpeer <wg interface> <client ip> <server endpoint> [OPTIONS]
 ```
