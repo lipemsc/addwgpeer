@@ -15,8 +15,9 @@ print_wg_missing () {
     echo "WireGuard is not installed. Please install it."
 }
 
+WG_INTERFACE=$1
 
-if [ $# -lt 4 ] || [ "$1" == "-h" ]; then
+if [ $# -lt 4 ] || [ "$WG_INTERFACE" == "-h" ]; then
     print_help
     exit 1
 fi
@@ -36,8 +37,8 @@ if ! command -v qrencode &> /dev/null ; then
     exit 1
 fi
 
-WG_INTERFACE=$1
 CLIENT_IP=$2
+CLIENT_IP_WO_CIDR=$(echo $CLIENT_IP | cut -d'/' -f1)
 SERVER_ENDPOINT=$3
 
 
@@ -74,28 +75,27 @@ for i in $(seq 4 $#); do
 done
 
 
-if ! wg show $1 &> /dev/null ; then
-    echo "WireGuard interface $1 does not exist."
+if ! wg show $WG_INTERFACE &> /dev/null ; then
+    echo "WireGuard interface $WG_INTERFACE does not exist."
     exit 1
 fi
 
 
 PRIVKEY=$(wg genkey)
 PUBKEY=$(echo $PRIVKEY | wg pubkey)
-
-SERVERPUBKEY=$(wg show $1 public-key)
+SERVERPUBKEY=$(wg show $WG_INTERFACE public-key)
 
 #echo $PRIVKEY
 #echo $PUBKEY
 
-if ! wg set $1 peer $PUBKEY allowed-ips $2 &> /dev/null ; then
-    echo "Failed to add peer to WireGuard interface $1."
+if ! wg set $WG_INTERFACE peer $PUBKEY allowed-ips $CLIENT_IP_WO_CIDR &> /dev/null ; then
+    echo "Failed to add peer to WireGuard interface $WG_INTERFACE."
     exit 1
 fi
 
 
 echo "[Interface]
-Address = $2" > /tmp/wg-tmp
+Address = $CLIENT_IP" > /tmp/wg-tmp
 
 if [ -n "$DNS_SERVER" ]; then
     echo "DNS = $DNS_SERVER" >> /tmp/wg-tmp
@@ -110,7 +110,7 @@ if [ -n "$ALLOWED_IPS" ]; then
     echo "AllowedIPs = $ALLOWED_IPS" >> /tmp/wg-tmp
 fi
 
-echo "Endpoint = $3" >> /tmp/wg-tmp
+echo "Endpoint = $SERVER_ENDPOINT" >> /tmp/wg-tmp
 
 qrencode -t ansiutf8 < /tmp/wg-tmp
 
@@ -121,4 +121,4 @@ fi
 
 rm /tmp/wg-tmp
 
-wg-quick save $1
+wg-quick save $WG_INTERFACE
