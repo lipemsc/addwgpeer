@@ -6,7 +6,7 @@ print_help () {
     echo "OPTIONS:"
     echo "  -h, --help          Show this help message"
     echo "  --dns <dns server>  Set the DNS server for the client"
-    echo "  --allowed-ips <ip>  Set the allowed IPs for the client"
+    echo "  --allowed-ips <ip>  Set the allowed IPs for the client (default: 0.0.0.0/0,::/0)"
     echo "  --output <file>     Save the client configuration to a file"
     
 }
