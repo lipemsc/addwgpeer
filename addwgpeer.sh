@@ -37,11 +37,6 @@ if ! command -v qrencode &> /dev/null ; then
     exit 1
 fi
 
-CLIENT_IP=$2
-CLIENT_IP_WO_CIDR=$(echo $CLIENT_IP | cut -d'/' -f1)
-SERVER_ENDPOINT=$3
-
-
 for i in $(seq 4 $#); do
     j=$((i+1))
     # echo "$i = ${!i}"
@@ -81,6 +76,30 @@ if ! wg show $WG_INTERFACE &> /dev/null ; then
 fi
 
 
+CLIENT_IP=$2
+NO_OF_CLIENT_IPS=$(( $(echo $CLIENT_IP | grep -o ',' | wc -l)+1 ))
+CLIENT_IPS_WO_CIDR=()
+
+if [ $NO_OF_CLIENT_IPS -gt 0 ]; then
+    for i in $(seq 1 $NO_OF_CLIENT_IPS); do
+        ip=$(echo $CLIENT_IP | cut -d',' -f$i)
+        ip_wo_cidr=$(echo $ip | cut -d'/' -f1)
+        CLIENT_IPS_WO_CIDR+=($ip_wo_cidr)
+    done
+fi
+
+fst=1
+for i in ${CLIENT_IPS_WO_CIDR[*]}; do
+    if [ $fst -eq 1 ]; then
+        SERVER_ALLOWED_IPS=$i
+        fst=0
+    else
+        SERVER_ALLOWED_IPS="$SERVER_ALLOWED_IPS,$i"
+    fi
+done
+
+SERVER_ENDPOINT=$3
+
 PRIVKEY=$(wg genkey)
 PUBKEY=$(echo $PRIVKEY | wg pubkey)
 SERVERPUBKEY=$(wg show $WG_INTERFACE public-key)
@@ -88,7 +107,7 @@ SERVERPUBKEY=$(wg show $WG_INTERFACE public-key)
 #echo $PRIVKEY
 #echo $PUBKEY
 
-if ! wg set $WG_INTERFACE peer $PUBKEY allowed-ips $CLIENT_IP_WO_CIDR &> /dev/null ; then
+if ! wg set $WG_INTERFACE peer $PUBKEY allowed-ips $SERVER_ALLOWED_IPS &> /dev/null ; then
     echo "Failed to add peer to WireGuard interface $WG_INTERFACE."
     exit 1
 fi
