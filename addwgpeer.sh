@@ -127,6 +127,8 @@ PublicKey = $SERVERPUBKEY" >> /tmp/wg-tmp
 
 if [ -n "$ALLOWED_IPS" ]; then
     echo "AllowedIPs = $ALLOWED_IPS" >> /tmp/wg-tmp
+else
+    echo "AllowedIPs = 0.0.0.0/0,::/0" >> /tmp/wg-tmp
 fi
 
 echo "Endpoint = $SERVER_ENDPOINT" >> /tmp/wg-tmp
